@@ -1,6 +1,6 @@
 name: saveeye_provisioning
 description: Provisioning library for saveeye devices. Don't use directly, use saveeye_flutter_sdk instead.
-version: 0.0.4
+version: 0.0.5
 repository: https://github.com/saveeye/esp_provisioning_wifi
 
 environment:
@@ -13,7 +13,7 @@ dependencies:
   flutter_bloc: ^8.1.2
   equatable: ^2.0.5
   plugin_platform_interface: ^2.0.2
-  permission_handler: ^11.3.0
+  permission_handler: ">=11.3.0 <13.0.0"
 
 dev_dependencies:
   bloc_test: ^9.1.1
