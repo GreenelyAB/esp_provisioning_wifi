@@ -35,6 +35,14 @@ class FlutterEspBleProv {
         .provisionWifi(deviceName, proofOfPossession, ssid, passphrase);
   }
 
+  /// Stops any BLE scan and closes the link to the current device, if any.
+  ///
+  /// A call still waiting on that link fails with `device_disconnected`.
+  /// Completes without error when nothing is connected.
+  Future<void> disconnect() {
+    return FlutterEspBleProvPlatform.instance.disconnect();
+  }
+
   /// Returns the native platform version.
   Future<String?> getPlatformVersion() {
     return FlutterEspBleProvPlatform.instance.getPlatformVersion();

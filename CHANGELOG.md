@@ -42,3 +42,9 @@ Native changes:
 - Android: esp-idf-provisioning-android lib-2.4.4, Java/Kotlin 17, reports
   denied permissions (Android 12+ also requires `ACCESS_FINE_LOCATION`).
 - iOS: ESPProvision `~> 3.2.0`; no force casts on call arguments.
+
+## 0.2.0
+
+- `disconnect()` stops any BLE scan and closes the current Bluetooth link; a
+  call still waiting on the link fails with `device_disconnected`. It
+  completes without error when nothing is connected.

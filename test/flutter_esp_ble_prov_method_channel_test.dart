@@ -84,4 +84,12 @@ void main() {
           .having((e) => e.code, 'code', 'auth_failed')),
     );
   });
+
+  test('disconnect invokes the native disconnect without arguments', () async {
+    reply((_) async => null);
+
+    await prov.disconnect();
+    expect(calls.single.method, 'disconnect');
+    expect(calls.single.arguments, isNull);
+  });
 }

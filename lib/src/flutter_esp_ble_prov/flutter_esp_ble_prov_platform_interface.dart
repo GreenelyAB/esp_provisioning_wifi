@@ -41,4 +41,8 @@ abstract class FlutterEspBleProvPlatform extends PlatformInterface {
       String ssid, String passphrase) {
     throw UnimplementedError('provisionWifi has not been implemented');
   }
+
+  Future<void> disconnect() {
+    throw UnimplementedError('disconnect has not been implemented');
+  }
 }

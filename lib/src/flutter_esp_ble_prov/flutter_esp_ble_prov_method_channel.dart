@@ -54,6 +54,11 @@ class MethodChannelFlutterEspBleProv extends FlutterEspBleProvPlatform {
     await methodChannel.invokeMethod<void>('provisionWifi', args);
   }
 
+  @override
+  Future<void> disconnect() async {
+    await methodChannel.invokeMethod<void>('disconnect');
+  }
+
   static EspWifiNetwork _parseNetwork(Object? entry) {
     if (entry is Map) {
       final ssid = entry['ssid'];

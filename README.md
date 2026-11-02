@@ -33,12 +33,17 @@ try {
     // Wrong password.
   }
 }
+
+// Stops any BLE scan and closes the link; a no-op when nothing is connected.
+await prov.disconnect();
 ```
 
 Every call is a single attempt with no timeout of its own: callers own
 retries and timeouts. The connection opened by `scanWifiNetworks` is reused by
 a following `provisionWifi` for the same device and proof of possession, and
 replaced when a call on it is still pending (the caller gave up on it).
+`disconnect` closes it explicitly, e.g. when the user cancels; a call still
+waiting on it fails with `device_disconnected`.
 
 `EspWifiNetwork.auth` is one of `open`, `wep`, `wpa_psk`, `wpa2_psk`,
 `wpa_wpa2_psk`, `wpa2_enterprise`, `wpa3_psk`, `wpa2_wpa3_psk` or `unknown`.

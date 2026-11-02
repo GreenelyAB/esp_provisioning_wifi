@@ -197,6 +197,11 @@ class FlutterEspBleProvPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         val passphrase = call.stringArg("passphrase", reply) ?: return
         withPermissions(reply) { provisionWifi(deviceName, pop, ssid, passphrase, reply) }
       }
+      "disconnect" -> {
+        stopBleScan()
+        closeLink(ErrorCode.DEVICE_DISCONNECTED, "Disconnected by the caller")
+        reply.success(null)
+      }
       else -> result.notImplemented()
     }
   }

@@ -146,6 +146,8 @@ public class SwiftFlutterEspBleProvPlugin: NSObject, FlutterPlugin {
     private var linkObserver: LinkObserver?
     /// Bumped by every call that needs a link; a slower device lookup for an older call yields.
     private var linkRequest = 0
+    /// A device lookup scan for a call that needs a link is in progress.
+    private var isLookingUpDevice = false
 
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "flutter_esp_ble_prov", binaryMessenger: registrar.messenger())
@@ -186,6 +188,9 @@ public class SwiftFlutterEspBleProvPlugin: NSObject, FlutterPlugin {
             whenBluetoothOn(reply, unavailable: .connectFailed) {
                 self.provisionWifi(deviceName: deviceName, pop: pop, ssid: ssid, passphrase: passphrase, reply: reply)
             }
+        case "disconnect":
+            disconnect()
+            reply.success(nil)
         default:
             result(FlutterMethodNotImplemented)
         }
@@ -243,6 +248,19 @@ public class SwiftFlutterEspBleProvPlugin: NSObject, FlutterPlugin {
         guard scanReply != nil else { return }
         ESPProvisionManager.shared.stopESPDevicesSearch()
         scanReply = nil
+    }
+
+    // MARK: - Disconnect
+
+    /// Stops any scan and closes the current link; a call still waiting on either is answered.
+    private func disconnect() {
+        stopBleScan()
+        linkRequest += 1
+        if isLookingUpDevice {
+            // Ends the lookup at once; the superseded call answers `device_disconnected`.
+            ESPProvisionManager.shared.stopESPDevicesSearch()
+        }
+        closeLink(.deviceDisconnected, "Disconnected by the caller")
     }
 
     // MARK: - Wi-Fi scan
@@ -396,6 +414,7 @@ public class SwiftFlutterEspBleProvPlugin: NSObject, FlutterPlugin {
         }
         // ESPProvision can report the end of its scan more than once.
         var isResolved = false
+        isLookingUpDevice = true
         ESPProvisionManager.shared.createESPDevice(
             deviceName: deviceName,
             transport: .ble,
@@ -406,6 +425,7 @@ public class SwiftFlutterEspBleProvPlugin: NSObject, FlutterPlugin {
             onMain {
                 guard !isResolved else { return }
                 isResolved = true
+                self.isLookingUpDevice = false
                 let match = device.flatMap { $0.name == deviceName ? $0 : nil }
                 if let match {
                     self.devices[deviceName] = match
