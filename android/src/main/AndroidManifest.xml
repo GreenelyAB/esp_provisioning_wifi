@@ -1,14 +1,13 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  package="how.virc.flutter_esp_ble_prov">
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"
-        android:maxSdkVersion="30" />
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Legacy Bluetooth permissions, granted at install time up to Android 11. -->
     <uses-permission android:name="android.permission.BLUETOOTH"
         android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"
-        android:maxSdkVersion="30"/>
+        android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
-    <uses-permission android:name="android.permission.BLUETOOTH_SCAN"
-        android:usesPermissionFlags="neverForLocation" />
+    <!-- BLE scans need it up to Android 11; the plugin also asks for it on 12+. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-feature android:name="android.hardware.bluetooth_le"
         android:required="true"/>
 </manifest>
