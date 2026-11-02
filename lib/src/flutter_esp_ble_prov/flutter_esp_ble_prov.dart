@@ -1,35 +1,41 @@
+import 'esp_wifi_network.dart';
 import 'flutter_esp_ble_prov_platform_interface.dart';
 
-/// Plugin provides core functionality to provision ESP32 devices over BLE
+/// Provisions ESP32 devices with Wi-Fi credentials over BLE.
+///
+/// Every call is a single attempt; retries and timeouts belong to the caller.
+/// Failures throw a `PlatformException` whose `code` is one of
+/// `scan_start_failed`, `scan_failed`, `not_found`, `connect_failed`,
+/// `device_disconnected`, `auth_failed`, `network_not_found`,
+/// `permission_denied` or `failed`.
 class FlutterEspBleProv {
-  /// Initiates a scan of BLE devices with the given [prefix].
-  ///
-  /// ESP32 Arduino demo defaults this value to "PROV_"
+  /// Runs one BLE scan window and returns the advertised names that start
+  /// with [prefix]. An empty list means no device was found.
   Future<List<String>> scanBleDevices(String prefix) {
     return FlutterEspBleProvPlatform.instance.scanBleDevices(prefix);
   }
 
-  /// Scan the available WiFi networks for the given [deviceName] and
-  /// [proofOfPossession] string.
-
-  /// This library uses SECURITY_1 by default which insists on a
-  /// [proofOfPossession] string. ESP32 Arduino demo defaults this value to
-  /// "abcd1234"
-  Future<List<String>> scanWifiNetworks(
+  /// Connects to [deviceName] with [proofOfPossession] and returns the Wi-Fi
+  /// networks the device can see, open networks included.
+  ///
+  /// The security scheme (sec1 or sec2) follows the device's reported
+  /// version info; the proof of possession is skipped when the device
+  /// advertises the `no_pop` capability.
+  Future<List<EspWifiNetwork>> scanWifiNetworks(
       String deviceName, String proofOfPossession) {
     return FlutterEspBleProvPlatform.instance
         .scanWifiNetworks(deviceName, proofOfPossession);
   }
 
-  /// Provision the named WiFi network at [ssid] with the given [passphrase] for
-  /// the named device [deviceName] and [proofOfPossession] string.
-  Future<bool?> provisionWifi(String deviceName, String proofOfPossession,
+  /// Sends [ssid] and [passphrase] to [deviceName] and completes once the
+  /// device reports it joined the network.
+  Future<void> provisionWifi(String deviceName, String proofOfPossession,
       String ssid, String passphrase) {
     return FlutterEspBleProvPlatform.instance
         .provisionWifi(deviceName, proofOfPossession, ssid, passphrase);
   }
 
-  /// Returns the native platform version
+  /// Returns the native platform version.
   Future<String?> getPlatformVersion() {
     return FlutterEspBleProvPlatform.instance.getPlatformVersion();
   }

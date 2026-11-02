@@ -92,13 +92,13 @@ class EspProvisioningBloc
           timedOut: timedOut,
         ),
       );
-      var scannedNetworks = <String>[];
-      scannedNetworks = await espProvisioningService
+      final networks = await espProvisioningService
           .scanWifiNetworks(event.bluetoothDevice, event.proofOfPossession)
           .timeout(const Duration(seconds: TIMEOUT), onTimeout: () {
         timedOut = true;
         return List.empty();
       });
+      final scannedNetworks = [for (final network in networks) network.ssid];
       emit(
         state.copyWith(
           status: EspProvisioningStatus.wifiScanned,
@@ -123,7 +123,6 @@ class EspProvisioningBloc
     EspProvisioningEventWifiSelected event,
     Emitter<EspProvisioningState> emit,
   ) async {
-    bool wifiProvisioned = false;
     bool timedOut = false;
     try {
       emit(
@@ -133,13 +132,13 @@ class EspProvisioningBloc
           timedOut: timedOut,
         ),
       );
-      wifiProvisioned = (await espProvisioningService
+      await espProvisioningService
           .provisionWifi(event.bluetoothDevice, event.proofOfPossession,
               event.wifiNetwork, event.password)
           .timeout(const Duration(seconds: TIMEOUT), onTimeout: () {
         timedOut = true;
-        return false;
-      }))!;
+      });
+      final wifiProvisioned = !timedOut;
       emit(state.copyWith(
         status: EspProvisioningStatus.wifiProvisioned,
         wifiProvisioned: wifiProvisioned,
@@ -157,11 +156,11 @@ class EspProvisioningBloc
     if (Platform.isAndroid) {
       Map<Permission, PermissionStatus> status = await [
         Permission.bluetoothScan,
-        Permission.bluetoothConnect
+        Permission.bluetoothConnect,
+        Permission.location,
       ].request();
-      bluetoothIsGranted =
-          status[Permission.bluetoothScan] == PermissionStatus.granted &&
-              status[Permission.bluetoothConnect] == PermissionStatus.granted;
+      bluetoothIsGranted = status.values
+          .every((permission) => permission == PermissionStatus.granted);
     } else if (Platform.isIOS) {
       Map<Permission, PermissionStatus> status =
           await [Permission.bluetooth].request();

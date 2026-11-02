@@ -1,7 +1,7 @@
 name: saveeye_provisioning
-description: Provisioning library for saveeye devices. Don't use directly, use saveeye_flutter_sdk instead.
-version: 0.0.5
-repository: https://github.com/saveeye/esp_provisioning_wifi
+description: Wi-Fi provisioning of SaveEye (ESP32) devices over BLE. Greenely fork of saveeye/esp_provisioning_wifi.
+version: 0.1.0
+repository: https://github.com/GreenelyAB/esp_provisioning_wifi
 
 environment:
   sdk: ">=2.19.2 <4.0.0"

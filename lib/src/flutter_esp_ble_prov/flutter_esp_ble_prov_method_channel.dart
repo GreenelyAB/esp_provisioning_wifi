@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
+import 'esp_wifi_network.dart';
 import 'flutter_esp_ble_prov_platform_interface.dart';
 
 /// An implementation of [FlutterEspBleProvPlatform] that uses method channels.
@@ -21,15 +22,15 @@ class MethodChannelFlutterEspBleProv extends FlutterEspBleProvPlatform {
     final args = {'prefix': prefix};
     final raw =
         await methodChannel.invokeMethod<List<Object?>>('scanBleDevices', args);
-    final List<String> devices = [];
-    if (raw != null) {
-      devices.addAll(raw.cast<String>());
-    }
-    return devices;
+    if (raw == null) return const [];
+    return [
+      for (final name in raw)
+        if (name is String) name else throw _malformed('device name', name),
+    ];
   }
 
   @override
-  Future<List<String>> scanWifiNetworks(
+  Future<List<EspWifiNetwork>> scanWifiNetworks(
       String deviceName, String proofOfPossession) async {
     final args = {
       'deviceName': deviceName,
@@ -37,15 +38,12 @@ class MethodChannelFlutterEspBleProv extends FlutterEspBleProvPlatform {
     };
     final raw = await methodChannel.invokeMethod<List<Object?>>(
         'scanWifiNetworks', args);
-    final List<String> networks = [];
-    if (raw != null) {
-      networks.addAll(raw.cast<String>());
-    }
-    return networks;
+    if (raw == null) return const [];
+    return [for (final entry in raw) _parseNetwork(entry)];
   }
 
   @override
-  Future<bool?> provisionWifi(String deviceName, String proofOfPossession,
+  Future<void> provisionWifi(String deviceName, String proofOfPossession,
       String ssid, String passphrase) async {
     final args = {
       'deviceName': deviceName,
@@ -53,6 +51,24 @@ class MethodChannelFlutterEspBleProv extends FlutterEspBleProvPlatform {
       'ssid': ssid,
       'passphrase': passphrase
     };
-    return await methodChannel.invokeMethod<bool?>('provisionWifi', args);
+    await methodChannel.invokeMethod<void>('provisionWifi', args);
   }
+
+  static EspWifiNetwork _parseNetwork(Object? entry) {
+    if (entry is Map) {
+      final ssid = entry['ssid'];
+      final rssi = entry['rssi'];
+      final auth = entry['auth'];
+      if (ssid is String && rssi is num && auth is String) {
+        return EspWifiNetwork(ssid: ssid, rssi: rssi.toInt(), auth: auth);
+      }
+    }
+    throw _malformed('Wi-Fi network', entry);
+  }
+
+  static PlatformException _malformed(String what, Object? value) =>
+      PlatformException(
+        code: 'failed',
+        message: 'Malformed $what from the native plugin: $value',
+      );
 }
