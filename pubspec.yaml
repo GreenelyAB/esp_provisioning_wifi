@@ -1,6 +1,6 @@
 name: saveeye_provisioning
 description: Wi-Fi provisioning of SaveEye (ESP32) devices over BLE. Greenely fork of saveeye/esp_provisioning_wifi.
-version: 0.2.0
+version: 0.2.1
 repository: https://github.com/GreenelyAB/esp_provisioning_wifi
 
 environment:

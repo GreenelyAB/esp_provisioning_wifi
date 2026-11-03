@@ -10,7 +10,8 @@ import 'flutter_esp_ble_prov_platform_interface.dart';
 /// `permission_denied` or `failed`.
 class FlutterEspBleProv {
   /// Runs one BLE scan window and returns the advertised names that start
-  /// with [prefix]. An empty list means no device was found.
+  /// with [prefix]. On Android the scan ends at the first match; iOS returns
+  /// what its 5 s window found. An empty list means no device was found.
   Future<List<String>> scanBleDevices(String prefix) {
     return FlutterEspBleProvPlatform.instance.scanBleDevices(prefix);
   }

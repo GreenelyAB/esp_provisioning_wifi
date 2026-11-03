@@ -280,7 +280,10 @@ class FlutterEspBleProvPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
   // region BLE scan
 
-  /** One scan window of the Espressif `BleScanner` (6 s). */
+  /**
+   * Scans until the first device whose name starts with [prefix], then answers at once, like the
+   * native onboarding; otherwise answers empty when the Espressif `BleScanner` window (6 s) ends.
+   */
   @SuppressLint("MissingPermission")
   private fun scanBleDevices(prefix: String, reply: Reply) {
     stopBleScan()
@@ -291,11 +294,15 @@ class FlutterEspBleProvPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     val listener = object : BleScanListener {
       override fun onPeripheralFound(device: BluetoothDevice?, scanResult: ScanResult?) {
         val name = scanResult?.scanRecord?.deviceName ?: return
+        if (!name.startsWith(prefix)) return
         val serviceUuid = scanResult.scanRecord?.serviceUuids?.firstOrNull()?.uuid?.toString()
         if (device == null || serviceUuid == null) return
         onMain {
           devices[name] = BleConnector(device, serviceUuid)
           found += name
+          if (scanReply !== reply) return@onMain
+          stopBleScan()
+          reply.success(found.toList())
         }
       }
 

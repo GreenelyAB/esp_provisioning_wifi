@@ -48,3 +48,9 @@ Native changes:
 - `disconnect()` stops any BLE scan and closes the current Bluetooth link; a
   call still waiting on the link fails with `device_disconnected`. It
   completes without error when nothing is connected.
+
+## 0.2.1
+
+- Android: `scanBleDevices` answers as soon as the first device with the
+  prefix is seen, instead of waiting out the 6 s scan window. iOS keeps
+  ESPProvision's 5 s window.
